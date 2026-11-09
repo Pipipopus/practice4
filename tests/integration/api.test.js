@@ -170,3 +170,29 @@ describe('API: собственные проверки', () => {
     expect(body.items.map((t) => t.id)).toEqual([4, 2, 3, 1]);
   });
 });
+
+describe('TDD: фильтр по приоритету', () => {
+  beforeEach(() => startServer([
+    seedTicket(1, { title: 'VPN недоступен', priority: 'high', category: 'network', status: 'new' }),
+    seedTicket(2, { title: 'Сбой почты', priority: 'medium', category: 'software', status: 'new' }),
+    seedTicket(3, { title: 'Нет сети в 305', priority: 'high', category: 'network', status: 'resolved' }),
+    seedTicket(4, { title: 'Мышь не работает', priority: 'low', category: 'hardware', status: 'new' })
+  ]));
+
+  test('T-01. GET /api/tickets?priority=high возвращает только high', async () => {
+    const { status, body } = await getTickets({ priority: 'high' });
+    expect(status).toBe(200);
+    expect(body.total).toBe(2);
+    expect(body.items.every((t) => t.priority === 'high')).toBe(true);
+  });
+
+  test('T-02. priority сочетается с остальными фильтрами (AND)', async () => {
+    const { body } = await getTickets({ priority: 'high', status: 'new', category: 'network', search: 'vpn' });
+    expect(body.items.map((t) => t.id)).toEqual([1]);
+  });
+
+  test('T-03. пустой priority не ограничивает выборку', async () => {
+    const { body } = await getTickets({ priority: '' });
+    expect(body.total).toBe(4);
+  });
+});

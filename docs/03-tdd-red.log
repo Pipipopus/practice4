@@ -1,0 +1,94 @@
+FAIL tests/integration/api.test.js
+  ● TDD: фильтр по приоритету › T-01. GET /api/tickets?priority=high возвращает только high
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 2
+    Received: 4
+
+      183 |     const { status, body } = await getTickets({ priority: 'high' });
+      184 |     expect(status).toBe(200);
+    > 185 |     expect(body.total).toBe(2);
+          |                        ^
+      186 |     expect(body.items.every((t) => t.priority === 'high')).toBe(true);
+      187 |   });
+      188 |
+
+      at Object.toBe (tests/integration/api.test.js:185:24)
+
+FAIL tests/unit/core.test.js
+  ● TDD: фильтр по приоритету в filterAndSort › priority=high → заявки [3,1]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+      Array [
+        3,
+        1,
+    +   2,
+      ]
+
+      181 |     ['medium', []]
+      182 |   ])('priority=%s → заявки %j', (priority, ids) => {
+    > 183 |     expect(filterAndSort(tickets, { priority }).map((t) => t.id)).toEqual(ids);
+          |                                                                   ^
+      184 |   });
+      185 | });
+      186 |
+
+      at toEqual (tests/unit/core.test.js:183:67)
+
+  ● TDD: фильтр по приоритету в filterAndSort › priority=low → заявки [2]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Array [
+    +   3,
+    +   1,
+        2,
+      ]
+
+      181 |     ['medium', []]
+      182 |   ])('priority=%s → заявки %j', (priority, ids) => {
+    > 183 |     expect(filterAndSort(tickets, { priority }).map((t) => t.id)).toEqual(ids);
+          |                                                                   ^
+      184 |   });
+      185 | });
+      186 |
+
+      at toEqual (tests/unit/core.test.js:183:67)
+
+  ● TDD: фильтр по приоритету в filterAndSort › priority=medium → заявки []
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   3,
+    +   1,
+    +   2,
+    + ]
+
+      181 |     ['medium', []]
+      182 |   ])('priority=%s → заявки %j', (priority, ids) => {
+    > 183 |     expect(filterAndSort(tickets, { priority }).map((t) => t.id)).toEqual(ids);
+          |                                                                   ^
+      184 |   });
+      185 | });
+      186 |
+
+      at toEqual (tests/unit/core.test.js:183:67)
+
+Test Suites: 2 failed, 2 total
+Tests:       4 failed, 45 passed, 49 total
+Snapshots:   0 total
+Time:        0.527 s, estimated 1 s
+Ran all test suites.

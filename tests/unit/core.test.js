@@ -167,3 +167,19 @@ describe('U-07. Совместные фильтры (AND)', () => {
     expect(result.map((t) => t.id)).toEqual([1]);
   });
 });
+
+describe('TDD: фильтр по приоритету в filterAndSort', () => {
+  const tickets = [
+    ticket(1, { priority: 'high' }),
+    ticket(2, { priority: 'low' }),
+    ticket(3, { priority: 'high', status: 'resolved' })
+  ];
+
+  test.each([
+    ['high', [3, 1]],
+    ['low', [2]],
+    ['medium', []]
+  ])('priority=%s → заявки %j', (priority, ids) => {
+    expect(filterAndSort(tickets, { priority }).map((t) => t.id)).toEqual(ids);
+  });
+});

@@ -83,4 +83,15 @@ describe('HelpDesk — E2E-сценарии', () => {
       cy.get('b, i').should('not.exist');
     });
   });
+
+  it('E-05 (TDD). фильтр по приоритету в интерфейсе сочетается с категорией', () => {
+    page.setPriority('high');
+    page.items().should('have.length', 2);
+    page.setCategory('network');
+    page.items().should('have.length', 2).each(($item) => {
+      cy.wrap($item).should('contain', 'Высокий').and('contain', 'Сеть');
+    });
+    page.setStatus('new');
+    page.items().should('have.length', 1).first().should('contain', 'VPN недоступен');
+  });
 });
