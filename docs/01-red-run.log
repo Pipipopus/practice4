@@ -1,0 +1,330 @@
+FAIL tests/integration/api.test.js
+  ● API: собственные проверки › I-01. Созданная заявка возвращается тем же GET-запросом
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "priority": "high",
+        "status": "new",
+    -   "title": "Сбой VPN в корпусе",
+    +   "title": "Сбой   VPN в корпусе",
+      }
+
+      88 |     // Assert
+      89 |     expect(created.status).toBe(201);
+    > 90 |     expect(created.body.ticket).toMatchObject({
+         |                                 ^
+      91 |       title: 'Сбой VPN в корпусе', // нормализованная тема
+      92 |       status: 'new',
+      93 |       priority: 'high'
+
+      at Object.toMatchObject (tests/integration/api.test.js:90:33)
+
+  ● API: собственные проверки › I-03. Тема из 3 символов, «раздутая» пробелами, отклоняется (400)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 201
+
+      114 |     const response = await postTicket({ ...validTicket, title: '   abc   ' });
+      115 |     const after = await getTickets();
+    > 116 |     expect(response.status).toBe(400);
+          |                             ^
+      117 |     expect(response.body.errors).toHaveProperty('title');
+      118 |     expect(after.body.total).toBe(0);
+      119 |   });
+
+      at Object.toBe (tests/integration/api.test.js:116:29)
+
+  ● API: собственные проверки › I-04. search + status + category работают как AND
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      130 |
+      131 |     expect(status).toBe(200);
+    > 132 |     expect(body.total).toBe(1);
+          |                        ^
+      133 |     expect(body.items.map((t) => t.id)).toEqual([1]);
+      134 |   });
+      135 |
+
+      at Object.toBe (tests/integration/api.test.js:132:24)
+
+  ● API: собственные проверки › I-05. Запрещённый переход new → resolved: HTTP 409, статус не изменился
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 200
+
+      140 |     const after = await getTickets();
+      141 |
+    > 142 |     expect(response.status).toBe(409);
+          |                             ^
+      143 |     expect(after.body.items[0].status).toBe('new');
+      144 |   });
+      145 |
+
+      at Object.toBe (tests/integration/api.test.js:142:29)
+
+  ● API: собственные проверки › I-07. Порядок в ответе: high → medium → low, внутри приоритета новее выше
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    +   1,
+    +   3,
+        4,
+        2,
+    -   3,
+    -   1,
+      ]
+
+      168 |     const { body } = await getTickets();
+      169 |
+    > 170 |     expect(body.items.map((t) => t.id)).toEqual([4, 2, 3, 1]);
+          |                                         ^
+      171 |   });
+      172 | });
+      173 |
+
+      at Object.toEqual (tests/integration/api.test.js:170:41)
+
+FAIL tests/unit/core.test.js
+  ● U-01. Нормализация темы › normalizeTitle("Сбой    принтера") → "Сбой принтера"
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Сбой принтера"
+    Received: "Сбой    принтера"
+
+      55 |     ['\tСбой\n\n принтера \t', 'Сбой принтера']
+      56 |   ])('normalizeTitle(%j) → %j', (input, expected) => {
+    > 57 |     expect(normalizeTitle(input)).toBe(expected);
+         |                                   ^
+      58 |   });
+      59 |
+      60 |   test('не-строка превращается в пустую строку', () => {
+
+      at toBe (tests/unit/core.test.js:57:35)
+
+  ● U-01. Нормализация темы › normalizeTitle("\tСбой\n\n принтера \t") → "Сбой принтера"
+
+    expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Сбой принтера
+    + Сбой
+    +
+    +  принтера
+
+      55 |     ['\tСбой\n\n принтера \t', 'Сбой принтера']
+      56 |   ])('normalizeTitle(%j) → %j', (input, expected) => {
+    > 57 |     expect(normalizeTitle(input)).toBe(expected);
+         |                                   ^
+      58 |   });
+      59 |
+      60 |   test('не-строка превращается в пустую строку', () => {
+
+      at toBe (tests/unit/core.test.js:57:35)
+
+  ● U-02. Границы длины темы (после нормализации) › 3 символа + пробелы по краям (сырая длина 7) → валидно: false
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      78 |   ])('$name → валидно: $valid', ({ title, valid }) => {
+      79 |     const errors = validateTicketInput(validInput({ title }));
+    > 80 |     expect('title' in errors).toBe(!valid);
+         |                               ^
+      81 |   });
+      82 | });
+      83 |
+
+      at toBe (tests/unit/core.test.js:80:31)
+
+  ● U-02. Границы длины темы (после нормализации) › 80 символов + пробелы по краям (сырая длина 84) → валидно: true
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      78 |   ])('$name → валидно: $valid', ({ title, valid }) => {
+      79 |     const errors = validateTicketInput(validInput({ title }));
+    > 80 |     expect('title' in errors).toBe(!valid);
+         |                               ^
+      81 |   });
+      82 | });
+      83 |
+
+      at toBe (tests/unit/core.test.js:80:31)
+
+  ● U-02. Границы длины темы (после нормализации) › слова через 5 пробелов: 84 «сырых», 80 после нормализации → валидно: true
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      78 |   ])('$name → валидно: $valid', ({ title, valid }) => {
+      79 |     const errors = validateTicketInput(validInput({ title }));
+    > 80 |     expect('title' in errors).toBe(!valid);
+         |                               ^
+      81 |   });
+      82 | });
+      83 |
+
+      at toBe (tests/unit/core.test.js:80:31)
+
+  ● U-04. Правила смены статуса › new → resolved: разрешено = false
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      109 |     ['new', 'closed', false] // неизвестный статус
+      110 |   ])('%s → %s: разрешено = %s', (from, to, allowed) => {
+    > 111 |     expect(canChangeStatus(from, to)).toBe(allowed);
+          |                                       ^
+      112 |   });
+      113 | });
+      114 |
+
+      at toBe (tests/unit/core.test.js:111:39)
+
+  ● U-05. Сортировка реестра › сначала high, затем medium, затем low
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   "high",
+    -   "medium",
+        "low",
+    +   "medium",
+    +   "high",
+      ]
+
+      121 |     ];
+      122 |     const result = filterAndSort(tickets);
+    > 123 |     expect(result.map((t) => t.priority)).toEqual(['high', 'medium', 'low']);
+          |                                           ^
+      124 |   });
+      125 |
+      126 |   test('при одинаковом приоритете более новая заявка выше', () => {
+
+      at Object.toEqual (tests/unit/core.test.js:123:43)
+
+  ● U-05. Сортировка реестра › при одинаковом приоритете более новая заявка выше
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    +   2,
+        3,
+        1,
+    -   2,
+      ]
+
+      131 |     ];
+      132 |     const result = filterAndSort(tickets);
+    > 133 |     expect(result.map((t) => t.id)).toEqual([3, 1, 2]);
+          |                                     ^
+      134 |   });
+      135 |
+      136 |   test('сортировка не изменяет исходный массив по составу', () => {
+
+      at Object.toEqual (tests/unit/core.test.js:133:37)
+
+  ● U-06. Поиск › поиск "vpn" находит заявки [1]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 1
+
+    - Array [
+    -   1,
+    - ]
+    + Array []
+
+      152 |     ['кнопка', [2]] // совпадение только в описании
+      153 |   ])('поиск %j находит заявки %j', (search, ids) => {
+    > 154 |     expect(filterAndSort(tickets, { search }).map((t) => t.id)).toEqual(ids);
+          |                                                                 ^
+      155 |   });
+      156 | });
+      157 |
+
+      at toEqual (tests/unit/core.test.js:154:65)
+
+  ● U-06. Поиск › поиск "УЧЕБНОЙ СЕТИ" находит заявки [1]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 1
+
+    - Array [
+    -   1,
+    - ]
+    + Array []
+
+      152 |     ['кнопка', [2]] // совпадение только в описании
+      153 |   ])('поиск %j находит заявки %j', (search, ids) => {
+    > 154 |     expect(filterAndSort(tickets, { search }).map((t) => t.id)).toEqual(ids);
+          |                                                                 ^
+      155 |   });
+      156 | });
+      157 |
+
+      at toEqual (tests/unit/core.test.js:154:65)
+
+  ● U-07. Совместные фильтры (AND) › поиск + статус + категория выполняются одновременно
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 1
+
+    - Array [
+    -   1,
+    - ]
+    + Array []
+
+      165 |     ];
+      166 |     const result = filterAndSort(tickets, { search: 'сеть', status: 'new', category: 'network' });
+    > 167 |     expect(result.map((t) => t.id)).toEqual([1]);
+          |                                     ^
+      168 |   });
+      169 | });
+      170 |
+
+      at Object.toEqual (tests/unit/core.test.js:167:37)
+
+Test Suites: 2 failed, 2 total
+Tests:       16 failed, 27 passed, 43 total
+Snapshots:   0 total
+Time:        0.445 s, estimated 1 s
+Ran all test suites.
