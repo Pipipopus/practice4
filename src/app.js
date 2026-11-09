@@ -4,6 +4,7 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { createTicketStore } = require('./store');
+const { FILTER_KEYS } = require('./core');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PUBLIC_FILES = {
@@ -54,12 +55,8 @@ function createApp({ seed, testMode = false } = {}) {
         return sendJson(res, 200, { status: 'ok' });
       }
       if (req.method === 'GET' && pathname === '/api/tickets') {
-        const items = store.list({
-          search: url.searchParams.get('search'),
-          status: url.searchParams.get('status'),
-          category: url.searchParams.get('category'),
-          priority: url.searchParams.get('priority')
-        });
+        const filters = Object.fromEntries(FILTER_KEYS.map((key) => [key, url.searchParams.get(key)]));
+        const items = store.list(filters);
         return sendJson(res, 200, { items, total: items.length });
       }
       if (req.method === 'POST' && pathname === '/api/tickets') {

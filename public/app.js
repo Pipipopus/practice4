@@ -5,11 +5,13 @@ const formMessage = document.querySelector('#form-message');
 const list = document.querySelector('#ticket-list');
 const count = document.querySelector('#count');
 const listMessage = document.querySelector('#list-message');
-const search = document.querySelector('#search');
-const statusFilter = document.querySelector('#filter-status');
-const categoryFilter = document.querySelector('#filter-category');
-const priorityFilter = document.querySelector('#filter-priority');
-
+// Поля фильтрации: имя параметра API → элемент интерфейса.
+const filters = {
+  search: document.querySelector('#search'),
+  status: document.querySelector('#filter-status'),
+  category: document.querySelector('#filter-category'),
+  priority: document.querySelector('#filter-priority')
+};
 const statusLabels = { new: 'Новая', in_progress: 'В работе', resolved: 'Завершена' };
 const priorityLabels = { low: 'Низкий', medium: 'Средний', high: 'Высокий' };
 const categoryLabels = { hardware: 'Оборудование', software: 'ПО', network: 'Сеть' };
@@ -49,12 +51,9 @@ function renderTicket(ticket) {
 async function loadTickets() {
   const requestId = ++lastRequest;
   try {
-    const query = new URLSearchParams({
-      search: search.value,
-      status: statusFilter.value,
-      category: categoryFilter.value,
-      priority: priorityFilter.value
-    });
+    const query = new URLSearchParams(
+      Object.entries(filters).map(([key, element]) => [key, element.value])
+    );
     const response = await fetch(`/api/tickets?${query.toString()}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
@@ -109,5 +108,5 @@ list.addEventListener('click', async (event) => {
   await loadTickets();
 });
 
-[search, statusFilter, categoryFilter, priorityFilter].forEach((element) => element.addEventListener('input', loadTickets));
+Object.values(filters).forEach((element) => element.addEventListener('input', loadTickets));
 loadTickets();

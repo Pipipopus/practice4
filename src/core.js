@@ -44,34 +44,39 @@ function canChangeStatus(from, to) {
   return false;
 }
 
+/** Поля, по которым фильтр работает как точное совпадение. */
+const EXACT_FILTERS = ['status', 'category', 'priority'];
+
+function matchesSearch(ticket, search) {
+  if (!search) return true;
+  return [ticket.title, ticket.description].some((text) => text.toLowerCase().includes(search));
+}
+
+function compareTickets(a, b) {
+  const byPriority = PRIORITY_RANK[b.priority] - PRIORITY_RANK[a.priority];
+  return byPriority !== 0 ? byPriority : b.createdAt.localeCompare(a.createdAt);
+}
+
 /**
  * Условия поиска объединяются оператором AND.
- * В результирующем списке первыми должны идти важные и новые заявки.
+ * В результирующем списке первыми идут важные и новые заявки.
  */
 function filterAndSort(tickets, filters = {}) {
   const search = String(filters.search || '').trim().toLowerCase();
-  const status = String(filters.status || '').trim();
-  const category = String(filters.category || '').trim();
-  const priority = String(filters.priority || '').trim();
+  const exact = EXACT_FILTERS
+    .map((field) => [field, String(filters[field] || '').trim()])
+    .filter(([, value]) => value);
   return tickets
-    .filter((ticket) => {
-      if (status && ticket.status !== status) return false;
-      if (category && ticket.category !== category) return false;
-      if (priority && ticket.priority !== priority) return false;
-      if (!search) return true;
-      return ticket.title.toLowerCase().includes(search) || ticket.description.toLowerCase().includes(search);
-    })
-    .sort((a, b) => {
-      const byPriority = PRIORITY_RANK[b.priority] - PRIORITY_RANK[a.priority];
-      if (byPriority !== 0) return byPriority;
-      return b.createdAt.localeCompare(a.createdAt);
-    });
+    .filter((ticket) => exact.every(([field, value]) => ticket[field] === value))
+    .filter((ticket) => matchesSearch(ticket, search))
+    .sort(compareTickets);
 }
 
 module.exports = {
   CATEGORIES,
   PRIORITIES,
   STATUSES,
+  FILTER_KEYS: ['search', ...EXACT_FILTERS],
   normalizeTitle,
   validateTicketInput,
   canChangeStatus,
