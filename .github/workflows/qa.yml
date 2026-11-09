@@ -4,16 +4,54 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  jest:
+    name: Unit + Integration (Jest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
       - name: Install dependencies
-        run: npm install
-      - name: Unit and integration tests
-        run: npm test
-      # Самостоятельное задание: добавить запуск Cypress E2E.
-      # Сначала запустите тестовый сервер и дождитесь /api/health.
+        run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0   # Cypress в этой задаче не нужен
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Integration tests
+        run: npm run test:integration
+
+  e2e:
+    name: E2E (Cypress)
+    runs-on: ubuntu-latest
+    needs: jest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Cypress binary
+        run: npx cypress install && npx cypress verify
+      - name: Start test server
+        run: npm run start:test > server.log 2>&1 &
+      - name: Wait for /api/health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/health | grep -q '"ok"'; then
+              echo "Server is ready"; exit 0
+            fi
+            sleep 1
+          done
+          echo "Server did not start"; cat server.log; exit 1
+      - name: Cypress run
+        run: npm run e2e
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
