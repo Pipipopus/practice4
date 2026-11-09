@@ -10,7 +10,7 @@ const PRIORITY_RANK = { low: 1, medium: 2, high: 3 };
  * Продукт передан студентам в исходном состоянии; корректность НЕ гарантируется.
  */
 function normalizeTitle(title) {
-  return typeof title === 'string' ? title.trim() : '';
+  return typeof title === 'string' ? title.trim().replace(/\s+/g, ' ') : '';
 }
 
 function validateTicketInput(input) {
@@ -19,7 +19,8 @@ function validateTicketInput(input) {
     return { input: 'Ожидается объект с данными заявки' };
   }
 
-  if (typeof input.title !== 'string' || input.title.length < 5 || input.title.length > 80) {
+  const title = normalizeTitle(input.title);
+  if (typeof input.title !== 'string' || title.length < 5 || title.length > 80) {
     errors.title = 'Тема должна содержать от 5 до 80 символов';
   }
 
@@ -38,7 +39,7 @@ function validateTicketInput(input) {
 
 function canChangeStatus(from, to) {
   if (!STATUSES.includes(from) || !STATUSES.includes(to)) return false;
-  if (from === 'new') return to === 'in_progress' || to === 'resolved';
+  if (from === 'new') return to === 'in_progress';
   if (from === 'in_progress') return to === 'resolved';
   return false;
 }
@@ -48,7 +49,7 @@ function canChangeStatus(from, to) {
  * В результирующем списке первыми должны идти важные и новые заявки.
  */
 function filterAndSort(tickets, filters = {}) {
-  const search = String(filters.search || '').trim();
+  const search = String(filters.search || '').trim().toLowerCase();
   const status = String(filters.status || '').trim();
   const category = String(filters.category || '').trim();
   return tickets
@@ -56,10 +57,10 @@ function filterAndSort(tickets, filters = {}) {
       if (status && ticket.status !== status) return false;
       if (category && ticket.category !== category) return false;
       if (!search) return true;
-      return ticket.title.includes(search) || ticket.description.includes(search);
+      return ticket.title.toLowerCase().includes(search) || ticket.description.toLowerCase().includes(search);
     })
     .sort((a, b) => {
-      const byPriority = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+      const byPriority = PRIORITY_RANK[b.priority] - PRIORITY_RANK[a.priority];
       if (byPriority !== 0) return byPriority;
       return b.createdAt.localeCompare(a.createdAt);
     });
