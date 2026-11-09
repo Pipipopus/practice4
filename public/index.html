@@ -60,6 +60,13 @@
             <option value="software">ПО</option>
             <option value="network">Сеть</option>
           </select>
+          <label for="filter-priority">Приоритет</label>
+          <select id="filter-priority" data-testid="priority-filter">
+            <option value="">Все приоритеты</option>
+            <option value="high">Высокий</option>
+            <option value="medium">Средний</option>
+            <option value="low">Низкий</option>
+          </select>
         </div>
         <p id="list-message" role="status"></p>
         <ul id="ticket-list" data-testid="ticket-list" class="tickets"></ul>

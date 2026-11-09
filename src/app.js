@@ -57,7 +57,8 @@ function createApp({ seed, testMode = false } = {}) {
         const items = store.list({
           search: url.searchParams.get('search'),
           status: url.searchParams.get('status'),
-          category: url.searchParams.get('category')
+          category: url.searchParams.get('category'),
+          priority: url.searchParams.get('priority')
         });
         return sendJson(res, 200, { items, total: items.length });
       }
