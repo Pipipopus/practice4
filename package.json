@@ -1,0 +1,21 @@
+{
+  "name": "isit4-autotest-helpdesk-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Учебный стенд для практической работы № 4 по автоматизации тестирования",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "start:test": "node test-server.js",
+    "test": "jest --runInBand",
+    "test:unit": "jest tests/unit --runInBand",
+    "test:integration": "jest tests/integration --runInBand",
+    "test:coverage": "jest --coverage --runInBand",
+    "e2e": "cypress run",
+    "e2e:open": "cypress open"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0",
+    "cypress": "^15.0.0"
+  }
+}

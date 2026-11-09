@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Учебный HelpDesk — стенд тестирования</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <header class="heading">
+      <p class="eyebrow">ИСИТ • лабораторный стенд</p>
+      <h1 data-testid="page-title">HelpDesk: заявки на поддержку</h1>
+      <p>Прототип содержит дефекты. Ваша задача — обнаружить их тестами и исправить.</p>
+    </header>
+    <div class="columns">
+      <section class="panel" aria-labelledby="new-ticket-title">
+        <h2 id="new-ticket-title">Новая заявка</h2>
+        <form id="ticket-form" data-testid="ticket-form">
+          <label for="title">Тема</label>
+          <input id="title" data-testid="title" name="title" type="text" required>
+          <label for="description">Описание</label>
+          <textarea id="description" data-testid="description" name="description" rows="4" required></textarea>
+          <label for="category">Категория</label>
+          <select id="category" data-testid="category" name="category">
+            <option value="hardware">Оборудование</option>
+            <option value="software">ПО</option>
+            <option value="network">Сеть</option>
+          </select>
+          <label for="priority">Приоритет</label>
+          <select id="priority" data-testid="priority" name="priority">
+            <option value="low">Низкий</option>
+            <option value="medium" selected>Средний</option>
+            <option value="high">Высокий</option>
+          </select>
+          <button class="primary" type="submit" data-testid="submit-ticket">Создать заявку</button>
+          <p id="form-message" data-testid="form-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <section class="panel" aria-labelledby="tickets-title">
+        <div class="list-header">
+          <h2 id="tickets-title">Реестр заявок</h2>
+          <span id="count" data-testid="ticket-count" class="count">0</span>
+        </div>
+        <div class="filters">
+          <label for="search">Поиск</label>
+          <input id="search" data-testid="search" type="search" placeholder="Тема или описание">
+          <label for="filter-status">Статус</label>
+          <select id="filter-status" data-testid="status-filter">
+            <option value="">Все статусы</option>
+            <option value="new">Новая</option>
+            <option value="in_progress">В работе</option>
+            <option value="resolved">Завершена</option>
+          </select>
+          <label for="filter-category">Категория</label>
+          <select id="filter-category" data-testid="category-filter">
+            <option value="">Все категории</option>
+            <option value="hardware">Оборудование</option>
+            <option value="software">ПО</option>
+            <option value="network">Сеть</option>
+          </select>
+        </div>
+        <p id="list-message" role="status"></p>
+        <ul id="ticket-list" data-testid="ticket-list" class="tickets"></ul>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
